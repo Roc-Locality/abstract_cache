@@ -7,4 +7,4 @@ The repo specifies the **CacheSim** trait as the interface required for all cach
 # Usage
 To import, under Cargo.toml [dependencies], add
 
-        abstract_cache = {git = "{url of this page}"}
+        abstract_cache = {git = "https://github.com/YYWmus/abstract_cache"}
