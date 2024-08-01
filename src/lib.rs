@@ -9,9 +9,8 @@ impl ObjIdTraits for i64 {}
 impl ObjIdTraits for i32 {}
 impl ObjIdTraits for String {}
 
-pub trait CacheSim <ObjId:ObjIdTraits> {
-    // fn set_trace(&mut self, trace: impl Iterator::<Item = ObjId>);
 
+pub trait CacheSim <ObjId:ObjIdTraits> {
     fn get_total_miss(&mut self, trace: impl Iterator::<Item = ObjId>, cache_size: usize) -> (usize, usize);
     /// returns (total_access_count, miss_count)
 
