@@ -2,11 +2,22 @@ use std::hash::Hash;
 use std::fmt::{Debug, Display};
 
 pub trait ObjIdTraits: Hash + Eq + PartialEq + Clone + Debug + Display {}
+
 impl ObjIdTraits for usize {}
+
+impl ObjIdTraits for u128 {}
 impl ObjIdTraits for u64 {}
 impl ObjIdTraits for u32 {}
+impl ObjIdTraits for u16 {}
+impl ObjIdTraits for u8 {}
+
+impl ObjIdTraits for i128 {}
 impl ObjIdTraits for i64 {}
 impl ObjIdTraits for i32 {}
+impl ObjIdTraits for i16 {}
+impl ObjIdTraits for i8 {}
+
+impl ObjIdTraits for &str {}
 impl ObjIdTraits for String {}
 
 pub enum AccessResult {
@@ -27,8 +38,6 @@ pub trait CacheSim <ObjId:ObjIdTraits> {
             (total, miss)
         })
     }
-    
-    /// returns (total_access_count, miss_count)
 
     fn get_mr(&mut self, trace: impl Iterator::<Item = ObjId>) -> f64 {
         let (total, miss) = self.get_total_miss(trace);
