@@ -1,12 +1,5 @@
 use std::hash::Hash;
 use std::fmt::{Debug, Display};
-#[derive(Debug, Clone, Hash, Eq, PartialEq)]
-pub struct RefAddressTuple(pub usize, pub usize);
-impl Display for RefAddressTuple {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "({}, {})", self.0, self.1)
-    }
-}
 pub trait ObjIdTraits: Hash + Eq + PartialEq + Clone + Debug + Display {}
 
 impl ObjIdTraits for usize {}
@@ -25,8 +18,6 @@ impl ObjIdTraits for i8 {}
 
 impl ObjIdTraits for &str {}
 impl ObjIdTraits for String {}
-
-impl ObjIdTraits for RefAddressTuple {}
 
 pub enum AccessResult {
     Hit,
