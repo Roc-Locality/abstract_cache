@@ -20,6 +20,8 @@ impl ObjIdTraits for i8 {}
 impl ObjIdTraits for &str {}
 impl ObjIdTraits for String {}
 
+impl ObjIdTraits for (usize, usize) {}
+
 pub enum AccessResult {
     Hit,
     Miss
