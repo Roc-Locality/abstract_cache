@@ -24,6 +24,23 @@ pub enum AccessResult {
     Miss
 }
 
+///Allows access.into()
+impl From<AccessResult> for bool {
+    fn from(value: AccessResult) -> Self {
+        match value {
+            AccessResult::Hit => true,
+            AccessResult::Miss => false,
+        }
+    }
+}
+
+///Allows true.into(), false.int()
+impl From<bool> for AccessResult {
+    fn from(value: bool) -> Self {
+        if value { AccessResult::Hit } else { AccessResult::Miss }
+    }
+}
+
 pub trait CacheSim <ObjId:ObjIdTraits> {
     fn cache_access(&mut self, access: ObjId) -> AccessResult;
 
