@@ -16,13 +16,13 @@ The implementation has changed from using the ObjId generic to an associated typ
 
 The old implementation
 
-        impl <...> CacheSim<Foo> for YourSim<Foo> {
+        impl <...> CacheSim<Foo> for YourSim<...> {
         ...
 
 becomes
 
-        impl <...> CacheSim for YourSim<Foo> {
+        impl <...> CacheSim for YourSim<...> {
                 type ObjId = Foo
         ...
 
-where, same as before, the Foo type/generic still needs to satisfy the trait bounds of ObjIdTraits. This includes built-in integer types, string types, or custom-defined types implementing ObjIdTraits. 
+**Foo** can be a type or generic, and still needs to satisfy the trait bounds of ObjIdTraits. This includes built-in integer types, string types, or custom-defined types implementing ObjIdTraits. 
