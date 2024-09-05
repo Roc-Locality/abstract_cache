@@ -18,7 +18,8 @@ The old implementation
         impl <...> CacheSim<Foo> for YourSim<Foo> {
         ...
 
-Becomes 
+Becomes
+
         impl <...> CacheSim for YourSim<Foo> {
                 type ObjId = Foo
         ...
