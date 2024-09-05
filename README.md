@@ -22,7 +22,7 @@ The old implementation
 becomes
 
         impl <...> CacheSim for YourSim<...> {
-                type ObjId = Foo
+                type ObjId = Foo;
         ...
 
 **Foo** can be a type or generic, and still needs to satisfy the trait bounds of ObjIdTraits. This includes built-in integer types, string types, or custom-defined types implementing ObjIdTraits. 
