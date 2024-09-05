@@ -50,9 +50,9 @@ pub trait CacheSim {
     type ObjId: ObjIdTraits;
     fn cache_access(&mut self, access: Self::ObjId) -> AccessResult;
 
-    fn set_capacity(&mut self, cache_size:usize) -> &mut Self;
+    fn set_capacity(&mut self, cache_size:usize);
 
-    fn get_total_miss(&mut self, trace: impl Iterator::<Item = Self::ObjId>) -> (usize, usize) {
+    fn get_total_miss(&mut self, trace: &mut dyn Iterator::<Item = Self::ObjId>) -> (usize, usize) {
         trace.fold((0,0), |(mut total, mut miss), o| {
             let access = self.cache_access(o);
             total += 1;
@@ -61,7 +61,7 @@ pub trait CacheSim {
         })
     }
 
-    fn get_mr(&mut self, trace: impl Iterator::<Item = Self::ObjId>) -> f64 {
+    fn get_mr(&mut self, trace: &mut dyn Iterator::<Item = Self::ObjId>) -> f64 {
         let (total, miss) = self.get_total_miss(trace);
         miss as f64 / total as f64
     }
@@ -69,7 +69,7 @@ pub trait CacheSim {
     /* Computes the reuse interval sequence for the trace. This is done by creating a hashmap from
      * the trace elements to the last reuse interval. The upon revisiting an element in the
      * hashmap, the reuse interval is updated and added to the reuse interval sequence. */
-    fn reuse_interval(&self, trace: impl Iterator<Item = Self::ObjId>) -> Vec<usize> {
+    fn reuse_interval(&self, trace: &mut dyn Iterator<Item = Self::ObjId>) -> Vec<usize> {
         let mut reuse_interval_vec = VecDeque::new();
         // Hashmap for storing previous reuse time of each element.
         let mut reuse_interval_map = HashMap::with_capacity(20);
@@ -90,7 +90,7 @@ pub trait CacheSim {
         reuse_interval_vec.into()
     }
 
-    fn access_times(&self, trace: impl Iterator<Item = Self::ObjId>) -> IndexMap<Self::ObjId, (usize, usize)> {
+    fn access_times(&self, trace: &mut dyn Iterator<Item = Self::ObjId>) -> IndexMap<Self::ObjId, (usize, usize)> {
         let mut map = IndexMap::<Self::ObjId, (usize, usize)>::with_capacity(20);
         for (time, x) in trace.enumerate() {
             map.entry(x)
@@ -105,11 +105,11 @@ pub trait CacheSim {
     }
 
     // Gives footprint given size x. Takes average working set size.
-    fn footprint(&self, trace: impl Iterator<Item = Self::ObjId>) -> Vec<f32> {
+    fn footprint(&self, trace: &mut dyn Iterator<Item = Self::ObjId>) -> Vec<f32> {
         let t: Vec<_> = trace.collect();
         let n = t.len();
-        let reuse_interval = self.reuse_interval(t.iter().cloned());
-        let access_times = self.access_times(t.iter().cloned());
+        let reuse_interval = self.reuse_interval(&mut t.iter().cloned());
+        let access_times = self.access_times(&mut t.iter().cloned());
         // number of unique elements
         let m = access_times.keys().len();
         let ri_map = reuse_interval.iter().fold(
@@ -170,10 +170,46 @@ mod tests {
             (o < self.capacity).into()
         }
 
-        fn set_capacity(&mut self, c: usize) -> &mut Self {
+        fn set_capacity(&mut self, c: usize) {
             self.capacity = c;
-            self
         }
+    }
+
+    struct MockCache2 {
+        capacity: usize
+    }
+
+    impl CacheSim for MockCache2 {
+        type ObjId = usize;
+        fn cache_access(&mut self, o: usize) -> AccessResult {
+            (o < self.capacity).into()
+        }
+
+        fn set_capacity(&mut self, c: usize) {
+            self.capacity = c;
+        }
+    }
+
+    #[test]
+    fn obj_safety_test() {
+        enum Tf {
+            True(String),
+            False(usize),
+            Other
+        }
+        fn get_mockcache(toggle: bool) -> Box<dyn CacheSim<ObjId = usize>> {
+             if toggle {
+                Box::new(MockCache {capacity:1})
+            } else {
+                Box::new(MockCache2 {capacity:1})
+            }
+        }
+        let mut a = get_mockcache(false);
+        let res = a.cache_access(1);
+        println!("{:?}", res)
+
+        
+        
     }
 
     #[test]
@@ -193,8 +229,8 @@ mod tests {
     fn reuse_interval_test_1() {
         let cache = MockCache {capacity: 1};
         let trace: Vec<usize> = vec![1, 2, 3, 1, 2, 3];
-        let reuse_interval = cache.reuse_interval(trace.into_iter());
-
+        let reuse_interval = cache.reuse_interval(&mut trace.iter().cloned());
+        println!("trace: {:?}", trace);
         assert_eq!(
             &reuse_interval,
             &[usize::MAX, usize::MAX, usize::MAX, 3, 3, 3]
@@ -205,7 +241,7 @@ mod tests {
     fn reuse_interval_test_2() {
         let cache = MockCache {capacity: 1};
         let trace: Vec<usize> = vec![1, 2, 3, 3, 2, 1];
-        let reuse_interval = cache.reuse_interval(trace.into_iter());
+        let reuse_interval = cache.reuse_interval(&mut trace.into_iter());
 
         assert_eq!(
             &reuse_interval,
@@ -233,7 +269,7 @@ mod tests {
               = 1 - 1 + 2 - 1 + 3 - 1 + 4 - 1 + 5 - 1 + 6 - 1
               = 15
          */
-        let footprint = cache.footprint(trace.into_iter());
+        let footprint = cache.footprint(&mut trace.into_iter());
 
         assert_eq!(&footprint, &[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0]);
     }
@@ -243,7 +279,7 @@ mod tests {
         let cache = MockCache {capacity: 1};
 
         let trace: Vec<usize> = vec![1, 2, 3, 3, 2, 1];
-        let footprint = cache.footprint(trace.into_iter());
+        let footprint = cache.footprint(&mut trace.into_iter());
 
         assert_eq!(
             &footprint,
