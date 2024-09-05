@@ -13,15 +13,16 @@ To import directly from git, under Cargo.toml [dependencies], add
 # Change to associated type (9/5/24)
 
 The implementation has changed from using the ObjId generic to an associated type with the same trait bounds. The purpose is to make the CacheSim trait object safe. For previously implemented simulators, a two-line change will be necessary.
+
 The old implementation
 
         impl <...> CacheSim<Foo> for YourSim<Foo> {
         ...
 
-Becomes
+becomes
 
         impl <...> CacheSim for YourSim<Foo> {
                 type ObjId = Foo
         ...
 
-Where, same as before, the Foo type/generic still needs to satisfy the trait bounds of ObjIdTraits. This includes built-in integer types, string types, or custom-defined types implementing ObjIdTraits. 
+where, same as before, the Foo type/generic still needs to satisfy the trait bounds of ObjIdTraits. This includes built-in integer types, string types, or custom-defined types implementing ObjIdTraits. 
