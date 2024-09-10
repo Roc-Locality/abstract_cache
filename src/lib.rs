@@ -173,6 +173,17 @@ mod tests {
     }
 
     #[test]
+    fn access_result_trait_test() {
+        let hit = AccessResult::Hit;
+        println!("hit: {:?}", hit);
+
+        let hit_b: bool = hit.clone().into();
+        assert!(hit_b);
+        assert_eq!(hit, AccessResult::Hit);
+
+    }
+
+    #[test]
     fn reuse_interval_test_1() {
         let cache = MockCache {};
         let trace: Vec<usize> = vec![1, 2, 3, 1, 2, 3];
