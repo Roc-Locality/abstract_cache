@@ -23,6 +23,8 @@ impl ObjIdTraits for i8 {}
 impl ObjIdTraits for &str {}
 impl ObjIdTraits for String {}
 
+
+#[derive(Debug, PartialEq, Clone)]
 pub enum AccessResult {
     Hit,
     Miss
